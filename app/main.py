@@ -41,9 +41,12 @@ table_schemas = {
 }
 
 def process_csv_chunk(chunk_df, table_ref, schema):
+
     """Process a chunk of CSV data and load it into BigQuery."""
     chunk_df.columns = [field.name for field in schema]
-
+    min_id = chunk_df['id'].min()
+    max_id = chunk_df['id'].max()
+    logger.info(f"Records from {min_id} to {max_id} id")
     job_config = bigquery.LoadJobConfig()
     job_config.source_format = bigquery.SourceFormat.CSV
     job_config.schema = schema
@@ -81,7 +84,7 @@ def upload_csv(
         table_id = target_table
         table_ref = client.dataset(dataset_id).table(table_id)
 
-        csv_reader = pd.read_csv(csv_stream, chunksize=DEFAULT_CSV_CHUNK_SIZE)
+        csv_reader = pd.read_csv(csv_stream, chunksize=DEFAULT_CSV_CHUNK_SIZE, header=None)
 
         chunk_count = 0
 
