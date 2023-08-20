@@ -1,5 +1,5 @@
-from fastapi import FastAPI, Form
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Form, Query
+from fastapi.responses import RedirectResponse, Response
 import pandas as pd
 from google.cloud import bigquery
 import requests
@@ -14,6 +14,7 @@ client = bigquery.Client()
 CHUNK_SIZE = 1000
 
 # Configuration
+DEFAULT_PROJECT_ID = "effortless-lock-396523"
 DEFAULT_DATASET_ID = "globant"
 DEFAULT_CSV_CHUNK_SIZE = 1000
 
@@ -98,6 +99,54 @@ def upload_csv(
 
     except pd.errors.EmptyDataError:
         return {"error": "CSV file is empty or invalid"}
+
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return {"error": str(e)}
+
+@app.get("/metrics/employees-by-job-dept")
+def employees_by_job_dept(
+    year: int = Query(..., description="Year for which to retrieve metrics"),
+    response_format: str = Query("json", description="Response format: 'json' or 'csv'")
+):
+    try:
+        if response_format not in ["json", "csv"]:
+            return {"error": "Invalid response format. Use 'json' or 'csv'"}
+
+        # Query BigQuery to get the required metrics
+        query = f"""
+            SELECT
+                d.department_name as department,
+                job_name as job,
+                SUM(IF(EXTRACT(QUARTER FROM start_date) = 1, 1, 0)) AS Q1,
+                SUM(IF(EXTRACT(QUARTER FROM start_date) = 2, 1, 0)) AS Q2,
+                SUM(IF(EXTRACT(QUARTER FROM start_date) = 3, 1, 0)) AS Q3,
+                SUM(IF(EXTRACT(QUARTER FROM start_date) = 4, 1, 0)) AS Q4
+            FROM
+                `{DEFAULT_PROJECT_ID}.{DEFAULT_DATASET_ID}.employees` as e
+            LEFT JOIN
+                 `{DEFAULT_PROJECT_ID}.{DEFAULT_DATASET_ID}.departments` as d ON e.department_id = d.id
+            LEFT JOIN
+                 `{DEFAULT_PROJECT_ID}.{DEFAULT_DATASET_ID}.jobs` as j ON e.job_id = j.id
+            WHERE
+                EXTRACT(YEAR FROM start_date) = {year}
+            GROUP BY
+                department_id, department_name, job_id, job_name
+            ORDER BY
+                department_name, job_name
+        """
+        print(query)
+        query_job = client.query(query)
+        results = query_job.result()
+
+        # Convert query results to a list of dictionaries
+        metrics_data = [dict(row) for row in results]
+
+        if response_format == "csv":
+            csv_content = pd.DataFrame(metrics_data).to_csv(index=False)
+            return Response(content=csv_content, media_type="text/csv")
+
+        return metrics_data
 
     except Exception as e:
         logger.error(traceback.format_exc())
