@@ -155,6 +155,61 @@ def employees_by_job_dept(
         logger.error(traceback.format_exc())
         return {"error": str(e)}
 
+@app.get("/metrics/higher-hiring-depts")
+def departments_hiring_above_mean(
+    year: int = Query(..., description="Year for which to retrieve metrics"),
+    response_format: str = Query("json", description="Response format: 'json' or 'csv'")
+):
+    try:
+        # Query BigQuery to get the required metrics
+        query = f"""
+            WITH department_metrics AS (
+                SELECT
+                    e.department_id,
+                    d.department_name,
+                    COUNT(*) AS hired
+                FROM
+                    `{DEFAULT_PROJECT_ID}.{DEFAULT_DATASET_ID}.employees` as e
+                LEFT JOIN
+                    `{DEFAULT_PROJECT_ID}.{DEFAULT_DATASET_ID}.departments` as d ON e.department_id = d.id
+                WHERE
+                    EXTRACT(YEAR FROM start_date) = {year}
+                GROUP BY
+                    department_id, department_name
+            )
+
+            SELECT
+                dm.department_id,
+                dm.department_name,
+                dm.hired
+            FROM
+                department_metrics dm
+            JOIN (
+                SELECT
+                    AVG(hired) AS mean_hired
+                FROM
+                    department_metrics
+            ) avg_metrics ON dm.hired > avg_metrics.mean_hired
+            ORDER BY
+                dm.hired DESC
+        """
+
+        query_job = client.query(query)
+        results = query_job.result()
+
+        # Convert query results to a list of dictionaries
+        metrics_data = [dict(row) for row in results]
+
+        if response_format == "csv":
+            csv_content = pd.DataFrame(metrics_data).to_csv(index=False)
+            return Response(content=csv_content, media_type="text/csv")
+
+        return metrics_data
+
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return {"error": str(e)}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
