@@ -1,0 +1,36 @@
+steps:
+  # Build the Docker container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/csv-api-migration/api-app:latest', '.']
+
+  # Push the built image to Google Container Registry (artifact repository)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/csv-api-migration/api-app:latest']
+
+  # Deploy container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [ "run",
+              "deploy",
+              "data-engineering-challenge",
+              "--project",
+              "$PROJECT_ID",
+              "--concurrency",
+              "40",
+              "--cpu",
+              "1",
+              "--memory",
+              "256Mi",
+              "--max-instances",
+              "1",
+              "--platform",
+              "managed",
+              "--region",
+              "us-central1",
+              "--image",
+              "us-central1-docker.pkg.dev/$PROJECT_ID/csv-api-migration/api-app:latest",
+              "--port",
+              "8000",
+              "--allow-unauthenticated"
+        ]
