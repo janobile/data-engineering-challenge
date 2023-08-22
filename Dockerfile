@@ -10,4 +10,4 @@ COPY . ./
 RUN pip install -r requirements.txt
 
 # Step 4: Run the web service on container startup using unicorn webserver.
-CMD exec uvicorn app.main:app --host 0.0.0.0 --port 8000
+CMD exec uvicorn main:app --host 0.0.0.0 --port 8000
