@@ -71,7 +71,7 @@ GOOGLE_APPLICATION_CREDENTIALS=credentials.json
 
 5. Run the FastAPI application:
 ```
-uvicorn app.main:app --reload
+uvicorn main:app --reload
 ```
 6. Access the FastAPI Swagger documentation at:
 http://localhost:8000/docs
@@ -108,13 +108,20 @@ The API is documented using Swagger UI, which provides an interactive interface 
 
 1. Run the FastAPI application using the command:
 ```
-uvicorn app.main:app --reload
+uvicorn main:app --reload
 ```
 
 2. Access the Swagger documentation by opening your web browser and navigating to:
 [http://localhost:8000/docs](http://localhost:8000/docs)
 
 3. Explore the API endpoints, view their documentation, and even test them directly through the Swagger UI.
+
+## Cloud Deployment
+
+The API is now available on Google Cloud Platform (GCP) and can be accessed at the following URL:
+[https://data-engineering-challenge-hit5uiuwdq-uc.a.run.app](https://data-engineering-challenge-hit5uiuwdq-uc.a.run.app)
+
+Feel free to interact with the API remotely to upload CSV data, retrieve metrics, and explore its functionality.
 
 ## Adding GCP Credentials for Local Execution
 
