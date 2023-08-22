@@ -152,6 +152,32 @@ gcloud builds submit --config cloudbuild.yaml .
 ```
 4. Access the deployed API on Cloud Run.
 
+## Future Steps
+
+While the current implementation covers a significant portion of the challenge requirements, there are several areas where further improvements and enhancements can be made:
+
+1. **Authentication and Security:** Strengthen the API's security by implementing authentication mechanisms such as JWT tokens to protect sensitive data and restrict unauthorized access.
+
+2. **API Documentation Improvement:** Enhance the API documentation in the Swagger UI by providing more comprehensive explanations of endpoints, query parameters, and response formats.
+
+3. **Environment Setup Automation:** Streamline the setup process by providing scripts or instructions that automate the installation of dependencies and configuration of environment variables.
+
+4. **Error Handling and Error Messages:** Improve user experience by enhancing error handling and providing meaningful error messages in API responses for easier debugging.
+
+5. **User Input Validation:** Implement validation for user inputs to ensure adherence to expected formats, preventing invalid data from causing issues.
+
+6. **API Versioning:** Implement versioning for the API to facilitate future updates without disrupting existing clients.
+
+7. **Data Validation and Cleaning:** Validate and sanitize data being migrated from CSV files to maintain data integrity and accuracy in the database.
+
+8. **Container Image Versioning:** Include version tags for Docker images to manage different application versions and ensure consistency.
+
+9. **Automated Testing:** Establish a comprehensive set of automated tests to thoroughly validate the functionality and performance of the API codebase. Include unit tests and integration tests to ensure the functionality, performance, and security of the API.
+
+10. **Cloud-Based Testing Environment:** Create and configure a cloud-based testing environment, leveraging cloud services to simulate real-world usage scenarios and assess the system's behavior under various conditions.
+
+These future steps will contribute to enhancing the project's robustness, usability, and scalability as it evolves.
+
 ## Contributing
 
 1. Fork this repository.
