@@ -31,7 +31,7 @@ def insert_csv(df : DataFrame, table_id : str):
 
     job_config = bigquery.LoadJobConfig()
     job_config.source_format = bigquery.SourceFormat.CSV
-    job_config.schema = table_schemas.get(table_ref)
+    job_config.schema = table_schemas.get(table_id)
 
     load_job = client.load_table_from_dataframe(
         df, table_ref, job_config=job_config
