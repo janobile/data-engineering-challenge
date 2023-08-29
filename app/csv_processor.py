@@ -32,7 +32,7 @@ class CSVProcessor:
         chunk_df.columns = columns
         #Assign data types
         for col, dtype in columns.items():
-            chunk_df[col] = chunk_df[col].astype(dtype)
+            chunk_df[col] = chunk_df[col].astype(dtype, errors='ignore')
         # Process the chunk and load it into BigQuery
         min_id = chunk_df['id'].min()
         max_id = chunk_df['id'].max()
